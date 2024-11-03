@@ -1,0 +1,35 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django stuff:
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+
+# Django media and static files
+/media
+/staticfiles
+/static
+
+# Local development environment
+.env
+*.env
+*.local
+
+# Docker-specific files
+docker-compose.yaml
+docker-compose.local.yaml
+Dockerfile
+docker/dev.Dockerfile
+
+# VSCode-specific files
+.vscode/
+
+# Git
+.git
+.gitignore

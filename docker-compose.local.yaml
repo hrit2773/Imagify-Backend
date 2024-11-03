@@ -1,0 +1,58 @@
+version: '3.4'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/imagify
+    entrypoint: ["sh","scripts/start-dev.sh"]
+    env_file:
+      - ./docker/.local.env
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+      celery_worker:
+        condition: service_started
+      celery_beat:
+        condition: service_started
+  
+  celery_worker:
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+    volumes:
+      - .:/imagify
+    entrypoint: ["sh","scripts/celery_worker.sh"]
+    env_file:
+      - ./docker/.local.env
+    user: "celeryuser"
+    restart: always
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started
+
+  celery_beat:
+    build:
+      context: .
+      dockerfile: docker/dev.Dockerfile
+    volumes:
+      - .:/imagify
+    entrypoint: ["sh","scripts/celery_beat.sh"]
+    env_file:
+      - ./docker/.local.env
+    user: "celeryuser"
+    restart: always
+    depends_on:
+      db:
+        condition: service_started
+      redis:
+        condition: service_started

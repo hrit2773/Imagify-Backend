@@ -1,0 +1,32 @@
+version: '3.4'
+
+networks:
+  default:
+    name: imagify
+
+services:
+  db:
+    image: postgres:alpine
+    restart: unless-stopped
+    env_file:
+      - ./docker/.local.env
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+  redis:
+    image: redis/redis-stack-server:6.2.6-v10
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6380:6379"
+
+volumes:
+  postgres-data:
+  redis-data:
