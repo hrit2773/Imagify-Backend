@@ -1,6 +1,6 @@
 from rest_framework import viewsets,status
 from imagify.models.ImageModel import ImageModel,TransformationHistory
-from imagify.api.serializers.ImageTransformSerializer import GenerativeBackgroundSerializer,GenerativeFillSerializer, GenerativeReplaceSerializer,TransformationHistorySerializer
+from imagify.api.serializers.ImageTransformSerializer import GenerativeBackgroundSerializer,GenerativeFillSerializer, GenerativeReplaceSerializer,TransformationHistorySerializer, EnhanceSerializer
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from rest_framework import mixins
 from rest_framework.decorators import action
@@ -15,7 +15,7 @@ class ImageTransformViewset(
     viewsets.GenericViewSet
 ):
     permission_classes=[IsAuthenticated]
-    
+    queryset=ImageModel.objects.all()
     def get_queryset(self):
         return ImageModel.objects.filter(author=self.request.user)
     
@@ -26,7 +26,8 @@ class ImageTransformViewset(
             return GenerativeFillSerializer
         elif self.action == "generative_replace":
             return GenerativeReplaceSerializer
-        return super().get_serializer_class()
+        else:
+            return EnhanceSerializer
     
     @action(detail=True, methods=['POST'])
     def generative_background(self,request,pk=None):
@@ -141,14 +142,14 @@ class ImageTransformViewset(
         )
         TransformationHistory.objects.create(
             title= title,
-            transformation_type='gen_background_replace',
+            transformation_type='enhance',
             image_url=transformed_url,
             transformed_by=request.user
         )
         return Response(status=status.HTTP_200_OK)
     
     @action(detail=True, methods=['POST'])
-    def generative_fill(self,request,pk=None):
+    def generative_replace(self,request,pk=None):
         serializer=self.get_serializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
@@ -159,18 +160,25 @@ class ImageTransformViewset(
         transform_to=request.data.get('transform_to')
         replace_all=request.data.get('replace_all')
         with transaction.atomic():
-            transformed_url=CloudinaryImage(public_id).build_url(
-                transformation=[{
-                    "effect":f"gen_replace:from_{transform_from};to_{transform_to}{";multiple_True" if replace_all else ""}"
-                }]
-            )
+            if replace_all:
+                transformed_url=CloudinaryImage(public_id).build_url(
+                    transformation=[{
+                        "effect":f"gen_replace:from_{transform_from};to_{transform_to}"
+                    }]
+                )
+            else:
+                transformed_url=CloudinaryImage(public_id).build_url(
+                    transformation=[{
+                        "effect":f"gen_replace:from_{transform_from};to_{transform_to};multiple_True"
+                    }]
+                )
             ImageModel.objects.filter(pk=pk).update(
                 transformation_url=transformed_url,
                 title=title
             )
             TransformationHistory.objects.create(
                 title= title,
-                transformation_type='gen_background_replace',
+                transformation_type='gen_replace',
                 image_url=transformed_url,
                 transformed_by=request.user
             )
@@ -192,7 +200,7 @@ class ImageTransformViewset(
         )
         TransformationHistory.objects.create(
             title= title,
-            transformation_type='gen_background_replace',
+            transformation_type='gen_restore',
             image_url=transformed_url,
             transformed_by=request.user
         )
@@ -203,6 +211,7 @@ class TransformationHistoryViewset(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
+    queryset=TransformationHistory.objects.all()
     serializer_class=TransformationHistorySerializer
     def get_queryset(self):
         return TransformationHistory.objects.filter(transformed_by=self.request.user)
