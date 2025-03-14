@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+import cloudinary.api
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,8 +30,17 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_celery_results",
+    'rest_framework',
+    "cloudinary_storage",
+    "cloudinary",
     "imagify",
+    "users",
 ]
+
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -47,7 +57,7 @@ ROOT_URLCONF = "web_project.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        "DIRS": [BASE_DIR / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -59,6 +69,12 @@ TEMPLATES = [
         },
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 WSGI_APPLICATION = "web_project.wsgi.application"
 
@@ -89,7 +105,16 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",},
 ]
 
+STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 
+AUTH_USER_MODEL='users.User'
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -112,10 +137,15 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET')
+}
+
 CELERY_TIMEZONE = "Asia/Kolkata"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_BROKER_URL=os.environ.get('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND=os.environ.get('CELERY_RESULT_BACKEND')
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-

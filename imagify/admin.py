@@ -1,3 +1,10 @@
 from django.contrib import admin
+from .models.ImageModel import ImageModel,TransformationHistory
 
-# Register your models here.
+@admin.register(ImageModel)
+class AdminImage(admin.ModelAdmin):
+    fields=["title","image","author"]
+
+@admin.register(TransformationHistory)
+class AdminImage(admin.ModelAdmin):
+    fields=["__all__"]
