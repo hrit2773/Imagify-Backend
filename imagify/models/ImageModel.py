@@ -17,7 +17,7 @@ transformation_types=(
 class ImageModel(models.Model):
     title=models.TextField()
     image=models.ImageField( upload_to='images/',blank=True,max_length=10000)
-    author=models.ForeignKey(User, on_delete=models.PROTECT,blank=True)
+    author=models.ForeignKey(User, on_delete=models.PROTECT,blank=True,null=True)
     cloudinary_id=models.CharField(blank=True)
     transformation_url=models.URLField(blank=True)
     is_minted_NFT=models.BooleanField(default=False)
@@ -37,6 +37,7 @@ class ImageModel(models.Model):
                 ImageModel.objects.filter(pk=self.pk).update(cloudinary_id=self.cloudinary_id)
 
 class TransformationHistory(models.Model):
+    original_image=models.ForeignKey(ImageModel,related_name="transformations",on_delete=models.PROTECT)
     title=models.TextField()
     transformation_type=models.CharField(choices=transformation_types)
     image_url=models.URLField()

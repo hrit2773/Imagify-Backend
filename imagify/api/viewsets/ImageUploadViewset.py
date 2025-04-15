@@ -8,11 +8,11 @@ from rest_framework.parsers import MultiPartParser,FormParser
 class ImageUploadViewset(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet
 ):
     queryset = ImageModel.objects.all()
     serializer_class=ImageUploadSerializer
-    permission_classes=[IsAuthenticated,IsAdminUser]
     parser_classes=[MultiPartParser,FormParser]
     

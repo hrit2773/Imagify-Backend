@@ -14,10 +14,7 @@ class ImageTransformViewset(
     mixins.CreateModelMixin,
     viewsets.GenericViewSet
 ):
-    permission_classes=[IsAuthenticated]
     queryset=ImageModel.objects.all()
-    def get_queryset(self):
-        return ImageModel.objects.filter(author=self.request.user)
     
     def get_serializer_class(self):
         if self.action == "generative_background":
@@ -51,9 +48,9 @@ class ImageTransformViewset(
             )
             ImageModel.objects.filter(pk=pk).update(
                 transformation_url=transformed_url,
-                title=title
             )
             TransformationHistory.objects.create(
+                original_image= ImageModel.objects.get(pk=pk),
                 title= title,
                 transformation_type='gen_background_replace',
                 image_url=transformed_url,
@@ -116,9 +113,9 @@ class ImageTransformViewset(
                 ])
             ImageModel.objects.filter(pk=pk).update(
                 transformation_url=transformed_url,
-                title=title
             )
             TransformationHistory.objects.create(
+                original_image= ImageModel.objects.get(pk=pk),
                 title= title,
                 transformation_type='gen_fill',
                 image_url=transformed_url,
@@ -138,9 +135,9 @@ class ImageTransformViewset(
         ])
         ImageModel.objects.filter(pk=pk).update(
             transformation_url=transformed_url,
-            title=title
         )
         TransformationHistory.objects.create(
+            original_image= ImageModel.objects.get(pk=pk),
             title= title,
             transformation_type='enhance',
             image_url=transformed_url,
@@ -174,9 +171,9 @@ class ImageTransformViewset(
                 )
             ImageModel.objects.filter(pk=pk).update(
                 transformation_url=transformed_url,
-                title=title
             )
             TransformationHistory.objects.create(
+                original_image= ImageModel.objects.get(pk=pk),
                 title= title,
                 transformation_type='gen_replace',
                 image_url=transformed_url,
@@ -196,9 +193,9 @@ class ImageTransformViewset(
         ])
         ImageModel.objects.filter(pk=pk).update(
             transformation_url=transformed_url,
-            title=title
         )
         TransformationHistory.objects.create(
+            original_image= ImageModel.objects.get(pk=pk),
             title= title,
             transformation_type='gen_restore',
             image_url=transformed_url,
@@ -215,4 +212,3 @@ class TransformationHistoryViewset(
     serializer_class=TransformationHistorySerializer
     def get_queryset(self):
         return TransformationHistory.objects.filter(transformed_by=self.request.user)
-    permission_classes=[IsAuthenticated]

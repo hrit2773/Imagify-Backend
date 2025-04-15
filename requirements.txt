@@ -51,3 +51,4 @@ urllib3==1.26.20
 vine==5.1.0
 virtualenv==20.27.1
 wcwidth==0.2.13
+django-cors-headers

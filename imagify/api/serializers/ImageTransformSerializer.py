@@ -29,4 +29,4 @@ class EnhanceSerializer(serializers.Serializer):
 class TransformationHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = TransformationHistory
-        fields = "__all__"
+        fields = ["title","transformation_type","image_url","transformed_by","transformed_at"]
